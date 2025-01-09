@@ -55,7 +55,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   // Add More names to myNames
   // use a number to track the index of the name you want to use.
   // Cycle through the names when you press the button, incrementing the number
@@ -64,7 +63,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
   final List<String> _myNames = [
     "Dan",
-    "Steve"
+    "Steve",
+    "Tyler",
+    "George",
+    "Elka",
+    "Fred"
   ];
 
   String? _myName;
@@ -72,15 +75,23 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    _myName = _myNames[0];   
-    
+    _myName = _myNames[0];
   }
 
-  void onPressed(){
-    setState(() {
-      _myName = _myNames[1];
-    });
-    
+  void onPressed() {
+    for (var i = 0; i < _myNames.length; i++) {
+      if (i == _myNames.length - 1) {
+        setState(() {
+          _myName = _myNames[0];
+        });
+        break;
+      } else if (_myName == _myNames[i]) {
+        setState(() {
+          _myName = _myNames[i + 1];
+        });
+        break;
+      }
+    }
   }
 
   @override
@@ -132,11 +143,10 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             TextButton(
-              onPressed: onPressed, 
-              child: const Text("Press Me Please!!!!"))
+                onPressed: onPressed, child: const Text("Press Me Please!!!!"))
           ],
         ),
       ),
-     );
+    );
   }
 }
