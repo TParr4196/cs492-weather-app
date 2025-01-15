@@ -44,6 +44,6 @@ void processForecast(Map<String, dynamic> forecast){
   String windSpeed = forecast["windSpeed"];
   String detailedForecast = forecast["detailedForecast"];
   if (forecast["dewpoint"] != null){
-    double dewpoint = forecast["dewpoint"]["value"];
+    double dewpoint = (forecast["dewpoint"]["value"]).toDouble();
   }
 }
