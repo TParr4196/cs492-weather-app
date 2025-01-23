@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:weatherapp/scripts/tests.dart' as tests;
+import 'package:weatherapp/scripts/location.dart' as location;
+import 'package:weatherapp/scripts/forecast.dart' as forecast;
 
 void main() {
   runApp(const MyApp());
@@ -58,13 +60,40 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
+  List<forecast.Forecast> _forecasts = [forecast.Forecast(name: "name", isDaytime: true, temperature: 0, temperatureUnit: "F", windSpeed: "windSpeed", windDirection: "windDirection", shortForecast: "shortForecast", detailedForecast: "detailedForecast", precipitationProbability: 0, humidity: 0, dewpoint: 0)];
+  location.Location? _currentLocation;
+
   @override
   void initState() {
     super.initState();
 
     // run tests initially
-    tests.testForecast();
+    //tests.testLocation();
+    setLocation();
+
   }
+
+  // TODO Create a new function called getForecasts(location.Location currentLocation)
+  // This function should use a location to call getForecastFromPoints(), passing in the lat, lon
+  // use setState the same way as setLocation does to set your _forecasts to the returned forecasts
+  Future<List<forecast.Forecast>> getForecasts(location.Location currentLocation) async{
+    return await forecast.getForecastFromPoints(currentLocation.latitude, currentLocation.longitude);
+  }
+
+  void setLocation() async {
+    if (_currentLocation == null){
+      // location.Location? currentLocation = await location.getLocationFromAddress(city, state, zip);
+      location.Location? currentLocation = await location.getLocationFromGps();
+
+      // TODO: Add a call to your getForecasts function passing in the currentLocation
+      List<forecast.Forecast> currentForecast = await getForecasts(currentLocation);
+      setState(() {
+        _currentLocation = currentLocation;
+        _forecasts = currentForecast;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -86,22 +115,67 @@ class _MyHomePageState extends State<MyHomePage> {
       body:Padding(
       padding: const EdgeInsets.all(16.0),
       child: Center(
-          child: Stack(
-            alignment: Alignment.center,
+          child: Column(
             children: [
-              Placeholder(
-                color: Colors.grey,
-                strokeWidth: 2.0,
-              ),
-              Text(
-                "Under Construction",
-                style: TextStyle(fontSize: 16, color: Colors.black),
-                textAlign: TextAlign.center,
-              ),
+              locationWidget(_currentLocation),
+              forecastWidget(_forecasts[0])
+              // TODO: add a new call to forecastWidget that passes in _forecasts[0]
             ],
           ),
         ),
       ),
+    );
+  }
+
+  
+  // TODO: add a new Row forecastWidget to display some basic forecast information
+  // you can choose the parts that you want to display for now.
+
+  Row forecastWidget(forecast.Forecast currentForecast) {
+    return Row(
+      //https://stackoverflow.com/questions/53181627/how-to-align-2-text-widgets-in-the-same-row-to-the-start-and-end-of-a-row-in-flu
+      //above link used for spacer widget
+      children: [
+        Text(
+          "${currentForecast.name} ",
+          style: TextStyle(fontSize: 16, color: Colors.black),
+          textAlign: TextAlign.center,
+        ),
+        Spacer(),
+        Text(
+          "temperature: ${currentForecast.temperature.toString()} ${currentForecast.temperatureUnit} ",
+          style: TextStyle(fontSize: 16, color: Colors.black),
+          textAlign: TextAlign.center,
+        ),
+        Spacer(),
+        Text(
+          "Wind: ${currentForecast.windSpeed} ${currentForecast.windDirection} ",
+          style: TextStyle(fontSize: 16, color: Colors.black),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  Row locationWidget(location.Location? currentLocation) {
+    return Row(
+      children: [
+        Text(
+          currentLocation != null ? currentLocation.city ?? "City" : "City",
+          style: TextStyle(fontSize: 16, color: Colors.black),
+          textAlign: TextAlign.center,
+        ),
+        Text(
+          currentLocation != null ? currentLocation.state ?? "State" : "State",
+          style: TextStyle(fontSize: 16, color: Colors.black),
+          textAlign: TextAlign.center,
+        ),
+        Text(
+          currentLocation != null ? currentLocation.zip ?? "Zip" : "Zip",
+          style: TextStyle(fontSize: 16, color: Colors.black),
+          textAlign: TextAlign.center,
+        ),
+      ],
     );
   }
 }
