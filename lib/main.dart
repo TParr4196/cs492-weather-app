@@ -161,6 +161,3 @@ class _MyHomePageState extends State<MyHomePage> {
 // TODO: This will require some research
 // When a forecast is set from the daily forecasts (_forecasts), 
 // filter the hourly forecasts to only include forecasts with the same startDate (not including time) as the activeForecast
-
-//https://stackoverflow.com/questions/63010255/get-first-few-words-of-a-string-in-dart
-// copied substring syntax on 1/30/25
