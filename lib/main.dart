@@ -65,8 +65,10 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
 
   List<forecast.Forecast> _forecastsHourly = [];
-  // create a new variable for _forecasts
+  List<forecast.Forecast> _forecasts = [];
+  List<forecast.Forecast> _forecastsHourlyUnfiltered = [];
   forecast.Forecast? _activeForecast;
+  forecast.Forecast? _activeDailyForecast;
   location.Location? _location;
 
   @override
@@ -80,7 +82,9 @@ class _MyHomePageState extends State<MyHomePage> {
     return forecast.getForecastHourlyFromPoints(currentLocation.latitude, currentLocation.longitude);
   }
 
-  // TODO: create a new function getForecasts that returns forecast.getForecastFromPoints
+  Future<List<forecast.Forecast>> getForecasts(location.Location currentLocation) async {
+    return forecast.getForecastFromPoints(currentLocation.latitude, currentLocation.longitude);
+  }
 
   void setActiveHourlyForecast(int i){
     setState(() {
@@ -88,19 +92,31 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  // create a new function: setActiveHourlyForecast that updates _activeForecast with _forecasts[i]
+  void setActiveForecast(int i){
+    setState(() {
+      _activeDailyForecast = _forecasts[i];
+      _forecastsHourly = filterForecasts(_forecasts[i].startTime);
+    });
+  }
 
+  List<forecast.Forecast> filterForecasts(String? startTime){
+     return _forecastsHourlyUnfiltered.where((f) => DateTime.parse(f.startTime!).day == DateTime.parse(startTime!).day).toList();
+  }
 
   void setLocation() async {
     if (_location == null){
       location.Location currentLocation = await location.getLocationFromGps();
 
       List<forecast.Forecast> currentHourlyForecasts = await getHourlyForecasts(currentLocation);
+      List<forecast.Forecast> currentDailyForecasts = await getForecasts(currentLocation);
 
       setState(() {
         _location = currentLocation;
         _forecastsHourly = currentHourlyForecasts;
+        _forecastsHourlyUnfiltered = currentHourlyForecasts;
+        _forecasts = currentDailyForecasts;
         _activeForecast = _forecastsHourly[10];
+        _activeDailyForecast = _forecasts[0];
         
       });
     }
@@ -131,7 +147,7 @@ class _MyHomePageState extends State<MyHomePage> {
             children: [
               LocationWidget(location: _location),
               _activeForecast != null ? ForecastWidget(forecast: _activeForecast!) : Text(""),
-              // TODO add a new ForecastSummariesWidget for the daily forecasts
+              _forecasts.isNotEmpty ? ForecastSummariesWidget(forecasts: _forecasts, setActiveForecast: setActiveForecast) : Text(""),
               _forecastsHourly.isNotEmpty ? ForecastSummariesWidget(forecasts: _forecastsHourly, setActiveForecast: setActiveHourlyForecast) : Text("")
             ],
           ),
@@ -146,3 +162,5 @@ class _MyHomePageState extends State<MyHomePage> {
 // When a forecast is set from the daily forecasts (_forecasts), 
 // filter the hourly forecasts to only include forecasts with the same startDate (not including time) as the activeForecast
 
+//https://stackoverflow.com/questions/63010255/get-first-few-words-of-a-string-in-dart
+// copied substring syntax on 1/30/25
