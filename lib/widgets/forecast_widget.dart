@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:weatherapp/scripts/forecast.dart' as forecast;
 import 'package:weatherapp/scripts/time.dart' as time;
 import 'package:weatherapp/scripts/math.dart' as math;
+import 'package:weatherapp/widgets/forecast_summary_widget.dart' as forecast_summary_widget;
 
 // TODO: Add the icon to this widget as well
 // Make it look good.
@@ -28,6 +29,7 @@ class ForecastWidget extends StatelessWidget {
             Text(_forecast.dewpoint != null ? "Dewpoint: ${math.roundToDecimalPlaces(_forecast.dewpoint, 2)}" : ""),
             Text(_forecast.humidity != null ? "Humidity: ${_forecast.humidity}" : ""),
             Text(_forecast.precipitationProbability != null ? "Chance of Rain: ${_forecast.precipitationProbability}" : ""),
+            forecast_summary_widget.WeatherIconWidget(iconPath: _forecast.getIconPath(), height: 200.0, width: 200.0)
           ],
         ),
       ),
