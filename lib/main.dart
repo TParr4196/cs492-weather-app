@@ -77,8 +77,9 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    setLocation();
-
+    if (_location == null){
+      setLocation(null);
+    }
   }
 
   Future<List<forecast.Forecast>> getForecasts(location.Location currentLocation) async {
@@ -118,24 +119,26 @@ class _MyHomePageState extends State<MyHomePage> {
     return _forecastsHourly.where((f)=>time.equalDates(f.startTime, _dailyForecasts[i].startTime)).toList();
   }
 
-  void setLocation() async {
-    if (_location == null){
-      location.Location currentLocation = await location.getLocationFromGps();
-
-      List<forecast.Forecast> currentHourlyForecasts = await getHourlyForecasts(currentLocation);
-      List<forecast.Forecast> currentForecasts = await getForecasts(currentLocation);
-
-      setState(() {
-        _location = currentLocation;
-        _forecastsHourly = currentHourlyForecasts;
-        _forecasts = currentForecasts;
-        setDailyForecasts();
-        _filteredForecastsHourly = getFilteredForecasts(0);
-        _activeForecast = _forecastsHourly[0];
-        
-        
-      });
+  void setLocation([List<String>? locationList]) async {
+    location.Location currentLocation;
+    if (locationList == null){
+      currentLocation = await location.getLocationFromGps();
     }
+    else {
+      currentLocation = await location.getLocationFromAddress(locationList[0], locationList[1], locationList[2]) as location.Location;
+    }
+
+    List<forecast.Forecast> currentHourlyForecasts = await getHourlyForecasts(currentLocation);
+    List<forecast.Forecast> currentForecasts = await getForecasts(currentLocation);
+
+    setState(() {
+      _location = currentLocation;
+      _forecastsHourly = currentHourlyForecasts;
+      _forecasts = currentForecasts;
+      setDailyForecasts();
+      _filteredForecastsHourly = getFilteredForecasts(0);
+      _activeForecast = _forecastsHourly[0];
+    });
   }
 
   @override
@@ -173,7 +176,8 @@ class _MyHomePageState extends State<MyHomePage> {
             filteredForecastsHourly: _filteredForecastsHourly,
             setActiveForecast: setActiveForecast,
             setActiveHourlyForecast: setActiveHourlyForecast),
-          LocationTabWidget()]
+          LocationTabWidget(
+            setLocation: setLocation)]
         ),
       ),
     );
@@ -185,11 +189,43 @@ class _MyHomePageState extends State<MyHomePage> {
 class LocationTabWidget extends StatelessWidget {
   const LocationTabWidget({
     super.key,
-  });
+    required Function setLocation
+  }) : _setLocation = setLocation;
+
+  final Function _setLocation;
 
   @override
   Widget build(BuildContext context) {
-    return Text("PLACEHOLDER!!!!!");
+    final cityController = TextEditingController();
+    final stateController = TextEditingController();
+    final zipController = TextEditingController();
+    return Column(
+      children: [
+        TextButton(
+        style: ButtonStyle(
+          foregroundColor: WidgetStateProperty.all<Color>(Colors.blue),
+        ),
+        onPressed: () {
+          _setLocation();
+        },
+        child: Text('Update Location to GPS'),
+      ),
+      Text("City"),
+      TextField(
+        controller: cityController,
+      ),
+      Text("State"),
+      TextField(
+        controller: stateController,
+      ),
+      Text("Zip"),
+      TextField(
+        controller: zipController,
+      ),
+      ElevatedButton(onPressed: (){
+        _setLocation([cityController.text, stateController.text, zipController.text]);
+      }, child: Text('Update Location with typed fields'))
+    ]);
   }
 }
 
