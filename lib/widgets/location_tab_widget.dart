@@ -1,17 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:weatherapp/scripts/location.dart' as location;
 
-
-// TODO: When the user clicks the Get From Location button:
-// Besides setting the active location (which it is already doing)
-// Add that location to a saved loations list (you'll need to create this)
-// Display the saved locations in a new widget below the get from GPS button
-// make the saved location widgets onTap()-able, so the user can tap a previously saved location, 
-// setting the location based on that
-// 
-
-
-class LocationTabWidget extends StatelessWidget {
+class LocationTabWidget extends StatefulWidget {
   const LocationTabWidget({
     super.key,
     required Function setLocation,
@@ -22,16 +12,52 @@ class LocationTabWidget extends StatelessWidget {
   final location.Location? _location;
 
   @override
+  State<LocationTabWidget> createState() => _LocationTabWidgetState();
+}
+
+class _LocationTabWidgetState extends State<LocationTabWidget> {
+  List<location.Location> _locationList = [];
+
+  void _addLocation(List<String> locationList) async{
+    location.Location newLoc = await location.getLocationFromAddress(locationList[0], locationList[1], locationList[2]) as location.Location;
+    _locationList.add(newLoc);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        LocationDisplayWidget(activeLocation: _location),
-        LoctionInputWidget(setLocation: _setLocation),
-        ElevatedButton(onPressed: ()=>{_setLocation()},child: const Text("Get From GPS"))
+        LocationDisplayWidget(activeLocation: widget._location),
+        LoctionInputWidget(setLocation: widget._setLocation, addLocation: _addLocation),
+        ElevatedButton(onPressed: ()=>{widget._setLocation()},child: const Text("Get From GPS")),
+        LocationListWidget(locations: _locationList)
       ],
     );
   }
 }
+
+class LocationListWidget extends StatelessWidget {
+  const LocationListWidget({
+    super.key,
+    required List<location.Location> locations
+  }): _locations = locations;
+
+  final List<location.Location> _locations;
+
+  @override
+  Widget build(BuildContext context){
+    return Text(_locations.toString());
+  }
+}
+
+// TODO: When the user clicks the Get From Location button:
+// Besides setting the active location (which it is already doing)
+// Add that location to a saved loations list (you'll need to create this)
+// Display the saved locations in a new widget below the get from GPS button
+// make the saved location widgets onTap()-able, so the user can tap a previously saved location, 
+// setting the location based on that
+// 
+
 
 class LocationDisplayWidget extends StatelessWidget {
   const LocationDisplayWidget({
@@ -50,10 +76,12 @@ class LocationDisplayWidget extends StatelessWidget {
 class LoctionInputWidget extends StatefulWidget {
   const LoctionInputWidget({
     super.key,
-    required Function setLocation
-  }) : _setLocation = setLocation;
+    required Function setLocation,
+    required Function addLocation
+  }) : _setLocation = setLocation, _addLocation = addLocation;
 
   final Function _setLocation;
+  final Function _addLocation;
 
   @override
   State<LoctionInputWidget> createState() => _LoctionInputWidgetState();
@@ -100,9 +128,6 @@ class _LoctionInputWidgetState extends State<LoctionInputWidget> {
     });
   }
 
-
-
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -117,7 +142,10 @@ class _LoctionInputWidgetState extends State<LoctionInputWidget> {
               LocationTextWidget(width: 100, text: "zip", controller: _zipController, updateText: _updateZip),
             ],
           ),
-          ElevatedButton(onPressed: () {widget._setLocation([_city, _state, _zip]);}, child: Text("Get From Address"))
+          ElevatedButton(onPressed: () {
+              widget._setLocation([_city, _state, _zip]);
+              widget._addLocation([_city, _state, _zip]);
+            }, child: Text("Get From Address"))
         ],
       ),
     );
