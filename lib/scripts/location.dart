@@ -1,3 +1,5 @@
+import 'dart:nativewrappers/_internal/vm/lib/ffi_native_type_patch.dart';
+
 import 'package:geocoding/geocoding.dart' as geocoding;
 import 'package:geolocator/geolocator.dart' as geolocator;
 
@@ -16,6 +18,22 @@ class Location{
     required this.longitude
   });
 
+  Location.fromJson(Map<String, dynamic> json)
+    : city = json['name'] as String,
+      state = json['name'] as String,
+      zip = json['name'] as String,
+      latitude = json['name'] as double,
+      longitude = json['email'] as double;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'state': state,
+      'city': city,
+      'zip': zip,
+      'latitude': latitude,
+      'longitude': longitude
+    };
+  }
 }
 
 Future<Location?> getLocationFromAddress(String rawCity, String rawState, String rawZip) async {
