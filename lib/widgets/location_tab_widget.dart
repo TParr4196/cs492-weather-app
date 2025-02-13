@@ -16,7 +16,7 @@ Future<String> get _localPath async {
 
 Future<File> get _localFile async {
   final path = await _localPath;
-  return File('$path/counter.txt');
+  return File('$path/weatherapp.txt');
 }
 
 class LocationTabWidget extends StatefulWidget {
@@ -48,7 +48,7 @@ class _LocationTabWidgetState extends State<LocationTabWidget> {
       final file = await _localFile;
 
       // Read the file
-      final loc = await file.readAsString();
+      final contents = await file.readAsString();
 
       _savedLocations = contents.split("\n").map((loc)=>location.Location.fromJson(loc)).toList();
     } catch (e) {
