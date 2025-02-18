@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 import 'package:flutter/material.dart';
 
 import 'package:weatherapp/scripts/location.dart' as location;
@@ -149,11 +147,4 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
-<<<<<<< HEAD
-
 }
-
->>>>>>> upstream/main
-=======
-}
->>>>>>> ef689e23834772522cb45f96ae57784cc6684bb3
