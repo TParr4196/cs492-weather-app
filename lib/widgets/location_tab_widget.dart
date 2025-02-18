@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:weatherapp/scripts/location.dart' as location;
+import 'package:weatherapp/scripts/location_storage.dart' as locationStorage;
 
 
-// TODO: When the user clicks the Get From Location button:
-// Besides setting the active location (which it is already doing)
-// Add that location to a saved locations list (you'll need to create this)
-// Display the saved locations in a new widget below the get from GPS button
-// make the saved location widgets onTap()-able, so the user can tap a previously saved location, 
-// setting the location based on that
-// 
-
+// TODO:
+// Refer to this documentation:
+// https://docs.flutter.dev/cookbook/persistence/reading-writing-files
+// Save the saved locations List<location.Location> as json data to a file whenever a new saved location is added
+// Load the saved locations from the file on initState
+// For now you don't need to worry about deleting data or ensuring no redundant data
+// HINT: You will likely want to create a fromJson() factory and a toJson() method to the location.dart Location class
 
 class LocationTabWidget extends StatefulWidget {
   const LocationTabWidget({
@@ -27,14 +27,18 @@ class LocationTabWidget extends StatefulWidget {
 
 class _LocationTabWidgetState extends State<LocationTabWidget> {
 
+  final locationStorage.LocationStorage ls = locationStorage.LocationStorage();
+
   List<location.Location> _savedLocations = [];
+
+
 
   void _setLocationFromAddress(String city, String state, String zip) async {
     // set location to null temporarily while it finds a new location
     widget._setLocation(null);
     location.Location currentLocation = await location.getLocationFromAddress(city, state, zip) as location.Location;
     widget._setLocation(currentLocation);
-    _savedLocations.add(currentLocation);
+    _addLocation(currentLocation);
   }
 
   void _setLocationFromGps() async {
@@ -45,9 +49,29 @@ class _LocationTabWidgetState extends State<LocationTabWidget> {
   }
 
   
-  void _addLocation(location.Location location){
+  void _addLocation(location.Location location) async{
     setState(() {
       _savedLocations.add(location);
+    });
+
+    await ls.writeLocations(_savedLocations);
+
+    
+  }
+
+  @override
+  void initState() {
+    // Get initial locations
+    super.initState();
+    _loadLocations();
+  }
+
+  void _loadLocations() async {
+    List<location.Location> locations = await ls.readLocations();
+    setState(() {
+      _savedLocations = locations;
+      print(locations);
+      print("test");
     });
   }
 
@@ -58,7 +82,7 @@ class _LocationTabWidgetState extends State<LocationTabWidget> {
         LocationDisplayWidget(activeLocation: widget._location),
         LoctionInputWidget(setLocation: _setLocationFromAddress), // pass in _addLocation
         ElevatedButton(onPressed: ()=>{_setLocationFromGps()},child: const Text("Get From GPS")),
-        SavedLocationsWidget(locations: _savedLocations)
+        SavedLocationsWidget(locations: _savedLocations, setLocation: widget._setLocation)
       ],
     );
   }
@@ -67,14 +91,32 @@ class _LocationTabWidgetState extends State<LocationTabWidget> {
 class SavedLocationsWidget extends StatelessWidget {
   const SavedLocationsWidget({
     super.key,
-    required List<location.Location> locations
-  }) : _locations = locations;
+    required List<location.Location> locations,
+    required Function setLocation
+  }) : _locations = locations, _setLocation = setLocation;
 
   final List<location.Location> _locations;
+  final Function _setLocation;
 
   @override
   Widget build(BuildContext context) {
-    return Column(children: [],);
+    return Column(children: _locations.map((loc)=>SavedLocationWidget(loc: loc, setLocation: _setLocation)).toList(),);
+  }
+}
+
+class SavedLocationWidget extends StatelessWidget {
+  const SavedLocationWidget({
+    super.key,
+    required location.Location loc,
+    required Function setLocation
+  }) : _loc = loc, _setLocation = setLocation;
+
+  final location.Location _loc;
+  final Function _setLocation;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(onTap: () {_setLocation(_loc);}, child: Text("${_loc.city}, ${_loc.state} ${_loc.zip}"));
   }
 }
 
@@ -110,7 +152,7 @@ class _LoctionInputWidgetState extends State<LoctionInputWidget> {
   late String _city;
   late String _state;
   late String _zip;
-  // initialize Controllers
+  
   @override
   void initState() {
     super.initState();
