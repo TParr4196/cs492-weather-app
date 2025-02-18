@@ -18,4 +18,8 @@ class LocationDatabase {
     );
     return LocationDatabase(db: db);
   }
+
+  void close() async{
+    await _db.close();
+  }
 }
