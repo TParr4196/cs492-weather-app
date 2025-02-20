@@ -147,7 +147,7 @@ class Forecast{
 
 Future<List<Forecast>> getForecastFromPoints(double lat, double lon) async{
   // make a request to the weather api using the latitude and longitude and decode the json data
-  String pointsUrl = "https://api.weather.gov/points/${lat},${lon}";
+  String pointsUrl = "https://api.weather.gov/points/$lat,$lon";
   Map<String, dynamic> pointsJson = await getRequestJson(pointsUrl);
 
   // pull the forecast URL from the response json
@@ -160,7 +160,7 @@ Future<List<Forecast>> getForecastFromPoints(double lat, double lon) async{
 
 Future<List<Forecast>> getForecastHourlyFromPoints(double lat, double lon) async{
   // make a request to the weather api using the latitude and longitude and decode the json data
-  String pointsUrl = "https://api.weather.gov/points/${lat},${lon}";
+  String pointsUrl = "https://api.weather.gov/points/$lat,$lon";
   Map<String, dynamic> pointsJson = await getRequestJson(pointsUrl);
 
   // pull the forecastHourly URL from the response json

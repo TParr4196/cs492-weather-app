@@ -1,15 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:weatherapp/my_home_page.dart';
 
-// TODO: With a partner, refactor the entire codebase (not just main.dart, every file)
-// You should be looking for opportunities to make the code better
-// Examples include (but are not limited to): Abstraction, Code Structure, Naming Conventions, Code Optimization, Redundant Code Removal, File names/directories
-// You should be working with a partner. One person should be making changes to the code and the other should be documenting those changes in documentation/refactor.txt
-
-void main() {
-  runApp(const MyApp());
-}
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
