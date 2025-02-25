@@ -4,6 +4,7 @@ import 'package:weatherapp/widgets/forecast/forecast_tab_widget.dart';
 import 'package:weatherapp/widgets/location/location_tab_widget.dart';
 import 'package:weatherapp/providers/location_provider.dart';
 import 'package:weatherapp/providers/forecast_provider.dart';
+import 'package:weatherapp/utils/theme_mode.dart';
 
 // TODOS: The TODOs are located in Assignment8-1 in canvas assignments
 void main() {
@@ -12,6 +13,8 @@ void main() {
     ChangeNotifierProvider(
         create: (context) => LocationProvider(
             Provider.of<ForecastProvider>(context, listen: false))),
+    
+    ChangeNotifierProvider(create: (context) => ThemeModeChanger())
   ], child: const MyApp()));
 }
 
@@ -22,6 +25,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    var settingsProvider = Provider.of<ThemeModeChanger>(context);
+
+
     return MaterialApp(
       title: title,
       darkTheme: ThemeData.dark(),
@@ -29,15 +36,17 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 143, 216, 233)),
         useMaterial3: true,
       ),
-      home: MyHomePage(title: title),
+      themeMode: settingsProvider.darkMode? ThemeMode.dark : ThemeMode.light,
+      home: MyHomePage(title: title, settingsProvider: settingsProvider),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+  const MyHomePage({super.key, required this.title, required this.settingsProvider});
 
   final String title;
+  final ThemeModeChanger settingsProvider;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -55,7 +64,14 @@ class _MyHomePageState extends State<MyHomePage> {
             title: Text(widget.title),
             bottom: TabBar(tabs: [
               Tab(icon: Icon(Icons.sunny_snowing)),
-              Tab(icon: Icon(Icons.edit_location_alt))
+              Tab(icon: Icon(Icons.edit_location_alt)),
+              Switch(
+                    value: widget.settingsProvider.darkMode,
+                    onChanged: (bool value) {
+                      setState(() {
+                        widget.settingsProvider.toggleMode();
+                      });
+                    }),
             ])),
         body: TabBarView(children: [ForecastTabWidget(), LocationTabWidget()]),
       ),
