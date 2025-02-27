@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:weatherapp/providers/settings_provider.dart';
@@ -5,9 +6,8 @@ import 'package:weatherapp/widgets/forecast/forecast_tab_widget.dart';
 import 'package:weatherapp/widgets/location/location_tab_widget.dart';
 import 'package:weatherapp/providers/location_provider.dart';
 import 'package:weatherapp/providers/forecast_provider.dart';
-import 'package:weatherapp/themes/themes.dart' as themes;
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
-// TODOS: The TODOs are located in Assignment8-1 in canvas assignments
 void main() {
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(create: (context) => ForecastProvider()),
@@ -29,8 +29,17 @@ class MyApp extends StatelessWidget {
 
     return MaterialApp(
       title: title,
-      theme: themes.lightTheme,
-      darkTheme: themes.darkTheme,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: settingsProvider.currentColor),
+        brightness: Brightness.light,
+        useMaterial3: true,
+      ),
+      darkTheme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: settingsProvider.currentColor,
+          brightness: Brightness.dark),
+        useMaterial3: true,
+      ),
       themeMode: settingsProvider.darkMode ? ThemeMode.dark : ThemeMode.light,
       home: MyHomePage(title: title),
     );
@@ -85,22 +94,30 @@ class SettingsButton extends StatelessWidget {
   }
 }
 
-class SettingsDrawer extends StatelessWidget {
+class SettingsDrawer extends StatefulWidget {
+  final SettingsProvider settingsProvider;
   const SettingsDrawer({
     super.key,
     required this.settingsProvider,
   });
+  @override
+  State<StatefulWidget> createState() => _SettingsDrawer();
+}
 
-  final SettingsProvider settingsProvider;
-
+class _SettingsDrawer extends State<SettingsDrawer> {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      child: Switch(
-          value: settingsProvider.darkMode,
-          onChanged: (bool value) {
-            settingsProvider.toggleMode();
-          }),
+      child: Column(
+        children: [
+          Switch(
+            value: widget.settingsProvider.darkMode,
+            onChanged: (bool value) {
+              widget.settingsProvider.toggleMode();
+            }),
+            ColorPicker(pickerColor: widget.settingsProvider.currentColor, onColorChanged: widget.settingsProvider.changeColor)
+        ]
+      ),
     );
   }
 }
